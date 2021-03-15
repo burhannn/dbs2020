@@ -1,0 +1,832 @@
+openapi: 3.0.2
+info:
+  title: DBS Programmierpraktikum - Phase 4 - API-Spezifikation
+  description: >-
+    In der folgenden Liste finden Sie die <b>für die Anwendergruppen
+    spezifischen Grundfunktionalitäten</b>. Es müssen <b>alle folgenden
+    allgemeinen Bedingungen</b> eingehalten werden:
+    <ul>
+      <li><b>Bei einer gültigen <code>GET</code>-Anfrage wird entweder ein JSON-Array von JSON-Objekten, falls die Ressource eine Sammlung von Entitäten darstellt, oder ein JSON-Objekt, falls die Ressource eine einzelne Entität darstellt, zurückgegeben</b> und dies mit einem Code <code>200</code> belegt. Wird die <code>GET</code>-Anfrage auf einer nicht vorhandenen Ressource ausgeführt, so wird mit Code <code>404</code> geantwortet. Ist die Ressource woanders zu finden, wird dies mit dem Code <code>301</code> und dem Link im Header belegt. Eine <code>GET</code>-Anfrage auf einer Ressource, die eine Sammlung von Entitäten darstellt, kann durch Übergabe von bestimmten Parametern und dazugehörigen Werten <b>case-insensitive gefiltert</b> werden. Dabei muss jede Entität in der Sammlung allen Parametern gleichzeitig genügen. Die Sammlung wird in der Antwort in ein JSON-Array gekapselt.</li>
+      <li><b>Bei <code>POST</code>-Anfragen werden alle Parameter bis auf diejenigen Parameter der entsprechenden Ressource benötigt, die Standardwerte besitzen.</b> Wird die <code>POST</code>-Anfrage auf einer nicht vorhandenen Ressource ausgeführt, so wird mit Code <code>404</code> geantwortet. Ist die Ressource vorhanden, aber die Anfragen wegen irgendeiner anderen Sache (ungültige Werte, zu wenig Parameter, ...) ungültig, so wird dies mit einem Code <code>400</code> beantwortet, anonsten mit Code <code>201</code> und dem Link zur neuen Ressource im Header belegt.</li>
+      <li><b>Bei <code>PATCH</code>-Anfragen werden nur diejenigen Parameter benötigt, die geändert werden sollen, folglich mindestens einer.</b> Wird die <code>PATCH</code>-Anfrage auf einer nicht vorhandenen Ressource ausgeführt, so wird mit Code <code>404</code> geantwortet. Ist die Ressource vorhanden, aber die Anfragen wegen irgendeiner anderen Sache (ungültige Werte, ...) ungültig, so wird dies mit einem Code <code>400</code> beantwortet, anonsten mit Code <code>204</code> belegt.</li>
+      <li><b>Bei einer gültigen <code>DELETE</code>-Anfrage wird der Code <code>204</code> zurückgegeben.</b> Ist die Ressource nicht vorhanden, wird dies mit Code <code>404</code> belegt.</li>
+      <li><b>Bereiche mit einem Schlosssymbol werden durch eine HTTP-Basisauthentifizierung abgesichert.</b> Wird einer dieser Bereiche ohne oder mit falschen Anmeldedaten aufgerufen, so wird dies mit einem <code>401</code> und dem Header <code>WWW-Authenticate</code> belegt. Sind die Anmeldedaten richtig, aber der Anwender ist nicht authorisiert, so wird dies mit einem Code <code>403</code> belegt.</li>
+      <li><b>In Antworten mit Code <code>4xx</code> wird ein JSON-Objekt, das mindestens den Schlüssel <code>"message"</code> mit dem Wert <code>&lt;Fehlermeldung&gt;</code> enthält, zurückgegeben</b>, wobei <code>&lt;Fehlermeldung&gt;</code> eine für den Umstand entsprechende Fehlermeldung ist. Bei einer auftretenden Exception reicht dafür die Nachricht dieser.</li>
+      <li><b>Antworten auf gültige <code>POST</code>- und <code>PATCH</code>-Anfragen beinhalten nichts.</b></li>
+      <li><b>Anfragen sind vom Typ <code>multipart/form-data</code>, Antworten sind vom Typ <code>application/json;charset=UTF-8</code>.</b></li>
+      <li><b>Datums- und Zeitangaben werden im entsprechenden Standard-SQL-Format übertragen</b> (sowohl in der Anfrage, als auch in der Antwort).</li>
+      <li><b>Passwörter werden der Einfachheit halber im Klartext übergeben.</b></li>
+      <li><b>Die erwähnten IDs sind RowIDs!!!</b></li>
+    </ul>
+  version: 2019.WiSe.2
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /veranstalter:
+    post:
+      tags:
+        - Anwender
+      summary: Fügt einen Veranstalter hinzu.
+      description: >-
+        Ein Veranstalter wird mit den entsprechenden Werten hinzugefügt. Ein zugeordneter User wird ebenfalls angelegt.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/user'
+                - $ref: '#/components/schemas/veranstalter'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+  /kuenstler:
+    post:
+      tags:
+        - Anwender
+      summary: Fügt einen Künstler hinzu.
+      description: >-
+        Ein Künstler wird mit den entsprechenden Werten hinzugefügt. Ein zugeordneter User wird ebenfalls angelegt.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/user'
+                - $ref: '#/components/schemas/kuenstler'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+  /besucher:
+    post:
+      tags:
+        - Anwender
+      summary: Fügt einen Besucher hinzu.
+      description: >-
+        Ein Besucher wird mit den entsprechenden Werten hinzugefügt. Ein zugeordneter User wird ebenfalls angelegt.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/user'
+                - $ref: '#/components/schemas/besucher'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+  /tickets:
+    get:
+      security:
+        - basic authentication: []
+      tags:
+        - Authentifizierter und als Besucher authorisierter Anwender
+      summary: Gibt die (eigenen) Tickets zurück.
+      description: >-
+        Alle (eigenen) Tickets werden zurückgegeben. Falls Query-Parameter mit Werten
+        angegeben wurden, wird die Rückgabe noch entsprechend gefiltert.
+      parameters:
+        - name: f_bezeichnung
+          in: query
+          description: 'Nur Tickets, deren zugeordnete Festivals die **Bezeichnung** `bezeichnung` enthalten, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: vip
+          in: query
+          description: 'Nur Tickets, die als **VIP-Kennzeichnung** `vip` besitzen, werden zurückgegeben.'
+          schema:
+            type: boolean
+        - name: preis
+          in: query
+          description: 'Nur Tickets, deren **Preis** größer-gleich `preis` ist, werden zurückgegeben.'
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: '**OK**.'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        ticketid:
+                          type: integer
+                          description: '**RowID des Tickets**.'
+                      required:
+                        - ticketid
+                    - $ref: '#/components/schemas/ticket'
+  /orte:
+    post:
+      tags:
+        - Authentifizierter und als Veranstalter authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Fügt einen Ort hinzu.
+      description: >-
+        Ein Ort wird mit den entsprechenden Werten hinzugefügt.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ort'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+  /festivals:
+    get:
+      tags:
+        - Anwender
+      summary: Gibt Festivals zurück.
+      description: >-
+        Alle Festivals werden zurückgegeben. Falls Query-Parameter mit Werten
+        angegeben wurden, wird die Rückgabe noch entsprechend gefiltert.
+      parameters:
+        - name: bezeichnung
+          in: query
+          description: 'Nur Festivals, deren **Bezeichnung** `bezeichnung` enthält, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: ort
+          in: query
+          description: 'Nur Festivals, die im **Ort** `Ort` stattfinden, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: veranstalter
+          in: query
+          description: 'Nur Festivals, die von dem **Veranstalter** `veranstalter` organisiert werden, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: jahr
+          in: query
+          description: 'Nur Festivals, die in dem **Jahr** `Jahr` stattfinden, werden (absteigend nach Datum sortiert) zurückgeben.'
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: '**OK**.'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        festivalid:
+                          type: integer
+                          description: '**RowID des Festivals**.'
+                      required:
+                        - festivalid
+                    - $ref: '#/components/schemas/festival'
+    post:
+      tags:
+        - Authentifizierter und als Veranstalter authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Fügt ein Festival hinzu.
+      description: >-
+        Ein Festival wird mit den entsprechenden Werten hinzugefügt. **Zusätzlich wird der authentifizierte Veranstalter als Organisator eingetragen**.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/festival'
+                - type: object
+                  properties:
+                    ortid:
+                      type: integer
+                      description: '**RowID** des zugeordneten Orts.'
+                  required:
+                    - ortid
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+  /bands:
+    get:
+      tags:
+        - Anwender
+      summary: Gibt Bands zurück.
+      description: >-
+        Alle Bands werden zurückgegeben. Falls Query-Parameter mit Werten
+        angegeben wurden, wird die Rückgabe noch entsprechend gefiltert.
+      parameters:
+        - name: name
+          in: query
+          description: 'Nur Bands, deren **Name** `name` enthält, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: genre
+          in: query
+          description: 'Nur Bands, denen das **Genre** `Genre` zugeordnet ist, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: gruendungsjahr
+          in: query
+          description: 'Nur Bands, dessen **Gründungsjahr** >= (größer-gleich) `gruendungsjahr` ist, werden zurückgegeben.'
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: '**OK**.'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        bandid:
+                          type: integer
+                          description: '**RowID der Band**.'
+                      required:
+                        - bandid
+                    - $ref: '#/components/schemas/band'
+    post:
+      tags:
+        - Authentifizierter und als Künstler authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Fügt eine Band hinzu.
+      description: >-
+        Eine Band wird mit den entsprechenden Werten hinzugefügt. **Der authentifizierte Künstler wird als Mitglied der Band eingetragen**.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/band'
+                - type: object
+                  properties:
+                    genreid:
+                      type: integer
+                      description: '**RowID des Genres**.'
+                  required:
+                    - genreid
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+  /bands/{bandid}/kuenstler:
+    post:
+      tags:
+        - Authentifizierter und als Künstler authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Fügt einer Band einen Künstler hinzu.
+      description: >-
+        Der Band mit **RowID** `bandid` wird ein Künstler hinzugefügt. **Der authentifizierte Künstler muss  Mitglied dieser Band sein**.
+      parameters:
+        - name: bandid
+          in: path
+          description: '**RowID der Band.**'
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    kuenstlerid:
+                      type: integer
+                      description: '**RowID des Künstlers**.'
+                  required:
+                    - kuenstlerid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+  /bands/{bandid}/genres:
+    post:
+      tags:
+        - Authentifizierter und als Künstler authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Ordnet einer Band ein Genre zu.
+      description: >-
+        Der Band mit **RowID** `bandid` wird ein Genre zugeordnet. **Der authentifizierte Künstler muss Mitglied dieser Band sein**.
+      parameters:
+        - name: bandid
+          in: path
+          description: '**RowID der Band.**'
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    genreid:
+                      type: integer
+                      description: '**RowID des Genres.**.'
+                  required:
+                    - genreid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+  /festivals/{festivalid}/buehnen:
+    get:
+      tags:
+        - Anwender
+      summary: Gibt Bühnen eines Festivals zurück.
+      description: >-
+        Alle Bühnen des Festivals mit der **RowID** `festivalid` werden zurückgegeben. Falls Query-Parameter mit Werten angegeben wurden, wird die Rückgabe noch entsprechend gefiltert.
+      parameters:
+        - name: festivalid
+          in: path
+          description: '**RowID des Festivals.**'
+          schema:
+            type: string
+          required: true
+        - name: bezeichnung
+          in: query
+          description: 'Nur Bühnen, deren **Bezeichnung** `bezeichnung` enthält, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: sitzplaetze
+          in: query
+          description: 'Nur Bühnen, die mindestens eine Anzahl von `sitzplaetze` **Sitzplätzen** haben, werden zurückgegeben.'
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: '**OK**.'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        buehneid:
+                          type: integer
+                          description: '**RowID der Bühne**.'
+                        festivalid:
+                          type: integer
+                          description: '**RowID des Festivals**.'
+                      required:
+                        - buehneid
+                        - festivalid
+                    - $ref: '#/components/schemas/buehne'
+        '404':
+          $ref: '#/components/responses/404'
+    post:
+      tags:
+        - Authentifizierter und als Veranstalter authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Fügt einem (eigenen) Festival eine Bühne hinzu.
+      description: >-
+        Dem Festival mit **RowID** `festivalid` wird eine Bühne mit den entsprechenden Werten hinzugefügt. **Der authentifizierte Veranstalter muss Organisator des Festivals sein.**
+      parameters:
+        - name: festivalid
+          in: path
+          description: '**RowID des Festivals.**'
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/buehne'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+  /tickets/{ticketid}:
+    delete:
+      security:
+        - basic authentication: []
+      tags:
+        - Authentifizierter und als Besucher authorisierter Anwender
+      summary: Löscht ein (eigenes) Ticket.
+      description: >-
+        Das (eigene) Ticket mit der **RowID** `ticketid` wird gelöscht.
+      parameters:
+        - name: ticketid
+          in: path
+          description: '**RowID des Tickets.**'
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+  /festivals/{festivalid}/tickets:
+    post:
+      tags:
+        - Authentifizierter und als Besucher authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Kauft ein Ticket.
+      description: >-
+        Kauft ein Ticket für das Festival mit **RowID** `festivalid` mit den entsprechenden Werten.
+      parameters:
+        - name: festivalid
+          in: path
+          description: '**RowID des Festivals.**'
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ticket'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+  /festivals/{festivalid}/buehnen/{buehneid}/programmpunkte:
+    get:
+      tags:
+        - Anwender
+      summary: Gibt Programmpunkte einer Bühne eines Festivals zurück.
+      description: >-
+        Alle Programmpunkte der Bühne mit **RowID** `buehneid` des Festivals mit **RowID** `festivalid` werden zurückgegeben.
+      parameters:
+        - name: festivalid
+          in: path
+          description: '**RowID des Festivals.**'
+          schema:
+            type: string
+          required: true
+        - name: buehneid
+          in: path
+          description: '**RowID der Bühne.**'
+          schema:
+            type: string
+          required: true
+        - name: bandname
+          in: query
+          description: 'Nur Programmpunkte, an denen die **Band** `bandname` spielt, werden zurückgegeben.'
+          schema:
+            type: string
+        - name: dauer
+          in: query
+          description: 'Nur Programmpunkte, die mindestens eine **Dauer** von `dauer` besitzen, werden zurückgegeben.'
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: '**OK**.'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                    - $ref: '#/components/schemas/programmpunkt'
+        '404':
+          $ref: '#/components/responses/404'
+    post:
+      tags:
+        - Authentifizierter und als Veranstalter authorisierter Anwender
+      security:
+        - basic authentication: []
+      summary: Fügt einem (eigenen) Festival bzw. Bühne einen Programmpunkt hinzu.
+      description: >-
+        Dem Festival mit **RowID** `festivalid` bzw. der Bühne mit **RowID** `buehneid` wird ein Programmpunkt mit den entsprechenden Werten (inklusive der auftretenden Band) hinzugefügt. **Der authentifizierte Veranstalter muss Organisator des Festivals sein.**
+      parameters:
+        - name: festivalid
+          in: path
+          description: '**RowID des Festivals.**'
+          schema:
+            type: string
+          required: true
+        - name: buehneid
+          in: path
+          description: '**RowID der Bühne.**'
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/programmpunkt'
+                - type: object
+                  properties:
+                    bandid:
+                      type: integer
+                      description: '**RowID der zugeordneten Band**.'
+                  required:
+                    - bandid
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+  /festivals/{festivalid}:
+    patch:
+      security:
+        - basic authentication: []
+      tags:
+        - Authentifizierter und als Veranstalter authorisierter Anwender
+      summary: Ändert ein (eigenes) Festival.
+      description: >-
+        Das Festival mit **RowID** `festivalid` wird geändert. **Der authentifizierte Veranstalter muss Organisator des Festivals sein.**
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    bezeichnung:
+                      type: string
+                      description: '**Bezeichnung** des Festivals.'
+                    datum:
+                      type: string
+                      format: date
+                      description: '**Datum** des Festivals im Format "YYYY-MM-DD".'
+                    bild:
+                      type: string
+                      format: binary
+                      description: '**Bild** des Festivals.'
+      parameters:
+        - name: festivalid
+          in: path
+          description: '**RowID des Festivals.**'
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+components:
+  securitySchemes:
+    basic authentication:
+      type: http
+      scheme: basic
+  responses:
+    '201':
+      description: '**Created**.'
+      headers:
+        Location:
+          description: Die URL der neuen Ressource.
+          schema:
+            type: string
+    '204':
+      description: '**No Content**.'
+    '301':
+      description: '**Moved Permanently**.'
+      headers:
+        Location:
+          description: Die URL der Ressource.
+          schema:
+            type: string
+    '400':
+      description: '**Bad Request**.'
+    '401':
+      description: '**Unauthorized**.'
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+    '403':
+      description: '**Forbidden**.'
+    '404':
+      description: '**Not Found**.'
+  schemas:
+    user:
+      type: object
+      properties:
+        email:
+          type: string
+          description: '**E-Mail-Adresse** des Users.'
+        passwort:
+          type: string
+          description: '**Passwort** des Users.'
+        vorname:
+          type: string
+          description: '**Vorname** des Users.'
+        nachname:
+          type: string
+          description: '**Nachname** des Users.'
+      required:
+        - email
+        - vorname
+        - nachname
+        - passwort
+    kuenstler:
+      type: object
+      properties:
+        kuenstlername:
+          type: string
+          description: '**Künstlername** des Künstlers.'
+    veranstalter:
+      type: object
+      properties:
+        veranstaltername:
+          type: string
+          description: '**Veranstaltername** des Veranstalters.'
+      required:
+        - veranstaltername
+    besucher:
+      type: object
+      properties:
+        geburtsdatum:
+          type: string
+          format: date
+          description: '**Geburtsdatum** des Besuchers im Format "YYYY-MM-DD".'
+        telefonnummer:
+          type: string
+          description: '**Telefonnummer** des Besuchers.'
+      required:
+        - geburtsdatum
+    band:
+      type: object
+      properties:
+        name:
+          type: string
+          description: '**Name** der Band.'
+        gruendungsjahr:
+          type: integer
+          description: '**Gründungsjahr** der Band.'
+      required:
+        - name
+        - gruendungsjahr
+    ticket:
+      type: object
+      properties:
+        preis:
+          type: number
+          format: double
+          description: '**Preis** des Tickets (inkl. 2 Nachkommastellen).'
+        datum:
+          type: string
+          format: date-time
+          description: '**Datum** des Tickets im Format "YYYY-MM-DD" oder "YYYY-MM-DD HH:MM:SS".'
+        vip:
+          type: boolean
+          description: '**VIP-Kennzeichnung** des Tickets.'
+      required:
+        - preis
+        - datum
+        - vip
+    buehne:
+      type: object
+      properties:
+        name:
+          type: string
+          description: '**Name** der Bühne.'
+        sitzplaetze:
+          type: integer
+          description: 'Anzahl der **Sitzplätze** der Bühne.'
+        stehplaetze:
+          type: integer
+          description: 'Anzahl der **Stehplätze** der Bühne.'
+      required:
+        - name
+        - sitzplaetze
+        - stehplaetze
+    programmpunkt:
+      type: object
+      properties:
+        startzeitpunkt:
+          type: string
+          format: date-time
+          description: '**Startzeitpunkt** des Programmpunkts im Format "HH:MM:SS" oder "YYYY-MM-DD HH:MM:SS".'
+        dauer:
+          type: integer
+          description: '**Dauer** des Programmpunkts.'
+      required:
+        - startzeitpunkt
+        - dauer
+    festival:
+      type: object
+      properties:
+        bezeichnung:
+          type: string
+          description: '**Bezeichnung** des Festivals.'
+        datum:
+          type: string
+          format: date
+          description: '**Datum** des Festivals im Format "YYYY-MM-DD".'
+        bild:
+          type: string
+          format: binary
+          description: '**Bild** des Festivals.'
+      required:
+        - bezeichnung
+        - datum
+        - bild
+    genre:
+      type: object
+      properties:
+        bezeichnung:
+          type: string
+          description: '**Bezeichnung** des Genres.'
+      required:
+        - bezeichnung
+    ort:
+      type: object
+      properties:
+        bezeichnung:
+          type: string
+          description: '**Name** des Ortes.'
+        land:
+          type: string
+          description: '**Land** des Orts.'
+      required:
+        - bezeichnung
+        - land

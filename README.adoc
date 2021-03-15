@@ -1,0 +1,26 @@
+### Zu den Error Codes:
+- Den Standard 400er hab ich immer ausgeben lassen falls was in der SQL fehlschlug.
+- 403 und 401 habe Ich nicht überall und klar unterschieden meist habe ich nur 403 ausgegeben beim Authorisierungsfehler. Aber an bestimmten Stellen hab ich das auch ganz klar getrennt.
+- Bei bestimmten Fehlercodes habe Ich auch versucht Fehlermeldungen auszugen, jedoch war dies nicht überall ganz klar.
+- 404 habe Ich auch versucht fast überall zu catchen.
+
+### Curl-Schwierigkeiten:
+----
+curl -X PATCH "http://localhost:8080/festivals/7" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "bezeichnung=nazFest" -F "datum=2020-04-12" -F "bild=@nazar.png;type=image/png" -u veranstalterEins@taneer.de:Tanne11
+----
+
+Bei diesem curl hat das vorgegebene des swagger Editors mit dem -d nicht funktioniert, deshalb habe ich alles mit @FormDataParam gemacht somit -F verwendet.
+
+### Sonstiges
+
+- Zusätzliche GETs: In einigen Controllern brauchte Ich GET Anfragen um zu sehen was eingefügt wurde in die DB. Hab diese GETs zum testen an einigen Stellen jetzt einfach drin gelassen.
+
+- Bild ausgeben/übergeben: In meinem Projekt wird das Bild als Byte Array abgespeichert und auch an einigen Stellen so gesetzt. Außerdem kann man sich das Bild Sogar im Browser ansehen wenn man z.B. localhost:8080/festivals/2 aufruft sieht man das Bild des Festivals mit id 2.
+
+- Meine Models/Schemas sind nicht 1 zu 1 dieselben wie im Swagger Editor.
+
+- Problem mit dem Einfügen eines Wertes ohne generierte ID: Habe Dann immmer von den vorhandenen IDs die MAX genommen und das + 1 war dann meine neue ID. Das ist leider etwas hardgecodet aber konnte leider nicht anders die IDs jeweils rauskriegen um sie dann zu inserten.
+
+- Nicht alle POST oder GET Anfragen sind im selbigen Controller. Zum Beispiel ist der POST zum kaufen eines Tickets in meinem FestivalController, da dies über /festivals läuft.
+
+- Hab nicht überall eine explizite Fehlermeldung wenn etwas schon vorhandenes eingefügt wird, gebe Ich meist einfach einen 400er Error.
