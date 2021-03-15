@@ -1,5 +1,7 @@
 # DBS Programmierpraktikum Januar 2020 - Phase 4 
 
+## Rest API Doku
+
 ### Zu den Error Codes:
 - Den Standard 400er hab ich immer ausgeben lassen falls was in der SQL fehlschlug.
 - 403 und 401 habe Ich nicht überall und klar unterschieden meist habe ich nur 403 ausgegeben beim Authorisierungsfehler. Aber an bestimmten Stellen hab ich das auch ganz klar getrennt.
